@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
-                            boolean success = SubtitlesReader.parseFile(inputStream);
+                            boolean success = SubtitlesParser.parseFile(inputStream);
 
                             if (success) {
                                 lastSelectedFileUri = uri; // store URI for restore in future
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void resetFileText(TextView fileTextt) {
         fileTextt.setText("");
-        SubtitlesReader.invalidateCurrentSubtitles();
+        SubtitlesParser.invalidateCurrentSubtitles();
     }
     private String getFileName(Uri uri) {
         String result = null;
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         filePickerLauncher.launch(intent);
     }
     public void StartSubtitleFirstLineClicked(View view) {
-        if (!SubtitlesReader.getIsHoldingValidSubtitles()) {
+        if (!SubtitlesParser.getIsHoldingValidSubtitles()) {
             Toast.makeText(this, "Select Subtitle File First", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void StartSubtitleFromResume(View view) {
-        if (!SubtitlesReader.getIsHoldingValidSubtitles()) {
+        if (!SubtitlesParser.getIsHoldingValidSubtitles()) {
             Toast.makeText(this, "Select Subtitle File First", Toast.LENGTH_SHORT).show();
             SubtitlePlaybackState.playbackPaused = false;
             return;

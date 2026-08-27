@@ -8,7 +8,6 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -91,7 +90,7 @@ public class SubtitleDisplay extends AppCompatActivity {
 
         // Handle SeekBar
         seekBar = findViewById(R.id.seekBar);
-        seekBar.setMax((int) SubtitlesReader.trackLength);
+        seekBar.setMax((int) SubtitlesParser.trackLength);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -102,7 +101,7 @@ public class SubtitleDisplay extends AppCompatActivity {
                 SubtitlePlaybackState.setTimeOffset((long) progress);
 
                 SubtitlePlaybackState.setCurrentIndex(
-                        SubtitlesReader.getIndexCorrespondingToTime(progress)
+                        SubtitlesParser.getIndexCorrespondingToTime(progress)
                 );
             }
 
@@ -163,7 +162,7 @@ public class SubtitleDisplay extends AppCompatActivity {
         SubtitlePlaybackState.setTimeOffset(newOffset);
 
         SubtitlePlaybackState.setCurrentIndex(
-                SubtitlesReader.getIndexCorrespondingToTime(newOffset)
+                SubtitlesParser.getIndexCorrespondingToTime(newOffset)
         );
     }
 
@@ -194,7 +193,7 @@ public class SubtitleDisplay extends AppCompatActivity {
     }
 
     private void updateSubtitle(long currentTimeMs) {
-        SubtitlesReader.Subtitle currentSubtitle = SubtitlesReader.getSubtitleAtIndex(SubtitlePlaybackState.getIndex());
+        SubtitlesParser.Subtitle currentSubtitle = SubtitlesParser.getSubtitleAtIndex(SubtitlePlaybackState.getIndex());
 
         // make sure we haven't reached the end
         if (currentSubtitle == null) {

@@ -1,14 +1,14 @@
 package com.thing.subtitleviewer;
 
-
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Scanner;
 
-public class SubtitlesReader {
+public class SubtitlesParser {
 
     private static boolean isHoldingValidSubtitles = false;
     public static boolean getIsHoldingValidSubtitles() {
@@ -20,26 +20,29 @@ public class SubtitlesReader {
 
     public static long trackLength = 0;
 
-    private final static ArrayList<Subtitle> AllSubtitles = new ArrayList<Subtitle>();
+    private final static ArrayList<Subtitle> allSubtitles = new ArrayList<Subtitle>();
 
     public static boolean parseFile(InputStream inputStream) {
-        AllSubtitles.clear(); // reset previous data
+        allSubtitles.clear(); // reset previous data
 
-        try (Scanner myReader = new Scanner(inputStream)) {
-            StringBuilder subtitleBlockStr = new StringBuilder();
+        try (BufferedReader myReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            StringBuilder subtitleBlockStr = new StringBuilder(128);
 
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine().trim() + "\n";
+            String data;
+            while ((data = myReader.readLine()) != null) {
+                data = data.trim();
 
-                if (data.equals("\n")) {
-                    Subtitle currentSubtitle = new Subtitle();
-                    currentSubtitle.parseSubtitleBlockStr(subtitleBlockStr.toString());
-                    AllSubtitles.add(currentSubtitle);
+                if (data.isEmpty()) {
+                    if (subtitleBlockStr.length() > 0) {
+                        Subtitle currentSubtitle = new Subtitle();
+                        currentSubtitle.parseSubtitleBlockStr(subtitleBlockStr.toString());
+                        allSubtitles.add(currentSubtitle);
+                    }
 
-                    //start the next subtitle block
-                    subtitleBlockStr = new StringBuilder();
+                    //reset for the next subtitle block
+                    subtitleBlockStr.setLength(0);
                 } else {
-                    subtitleBlockStr.append(data);
+                    subtitleBlockStr.append(data).append('\n');
                 }
             }
 
@@ -47,7 +50,7 @@ public class SubtitlesReader {
             if (subtitleBlockStr.length() > 0) {
                 Subtitle currentSubtitle = new Subtitle();
                 currentSubtitle.parseSubtitleBlockStr(subtitleBlockStr.toString());
-                AllSubtitles.add(currentSubtitle);
+                allSubtitles.add(currentSubtitle);
             }
             getTrackLength();
             isHoldingValidSubtitles = true;
@@ -74,47 +77,45 @@ public class SubtitlesReader {
 
             text = subData.substring(n);
         }
-        private void parseTimingLine(String line) throws Exception {
-            String[] stringParts = line.split(" ");
-
-            startTimeMs = parseTime(stringParts[0]);
-            endTimeMs = parseTime(stringParts[2]);
+        private void parseTimingLine(String line) {
+            startTimeMs = parseTime(line.substring(0, 12));
+            endTimeMs = parseTime(line.substring(17, 29));
 
         }
-        private long parseTime(String timeStr) throws ParseException {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss,SSS");
+        private long parseTime(String timeStr) {
+            int hours = Integer.parseInt(timeStr.substring(0, 2));
+            int minutes = Integer.parseInt(timeStr.substring(3, 5));
+            int seconds = Integer.parseInt(timeStr.substring(6, 8));
+            int milliseconds = Integer.parseInt(timeStr.substring(9, 12));
 
-            Date date = sdf.parse(timeStr); // parse the string
-            if (date == null) return 0;
-
-            // return milliseconds since start of day
-            return date.getTime()
-                    - sdf.parse("00:00:00,000").getTime();
+            return hours * 3_600_000L
+                    + minutes * 60_000L
+                    + seconds * 1_000L
+                    + milliseconds;
         }
     }
     private static void getTrackLength() {
 
-        Subtitle lastSub = AllSubtitles.get(AllSubtitles.size() - 1);
+        Subtitle lastSub = allSubtitles.get(allSubtitles.size() - 1);
 
         trackLength = lastSub.endTimeMs;
     }
 
     public static Subtitle getSubtitleAtIndex(int idx) {
-        ArrayList<Subtitle> subs = AllSubtitles;
-        if (idx < 0 || idx >= subs.size()) {
+        if (idx < 0 || idx >= allSubtitles.size()) {
             return null; // out of bounds
         }
-        return subs.get(idx);
+        return allSubtitles.get(idx);
     }
     public static int getIndexCorrespondingToTime(long timeMs) {
         // binary search because fancy
 
-        int left = 0, right = AllSubtitles.size() - 1;
-        int result = AllSubtitles.size() - 1;
+        int left = 0, right = allSubtitles.size() - 1;
+        int result = allSubtitles.size() - 1;
 
         while (left <= right) {
             int mid = (left + right) / 2;
-            Subtitle sub = AllSubtitles.get(mid);
+            Subtitle sub = allSubtitles.get(mid);
 
             if (timeMs < sub.startTimeMs) {
                 result = mid;
