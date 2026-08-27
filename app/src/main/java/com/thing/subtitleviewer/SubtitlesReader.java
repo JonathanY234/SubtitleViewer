@@ -18,7 +18,9 @@ public class SubtitlesReader {
         isHoldingValidSubtitles = false;
     }
 
-    private static ArrayList<Subtitle> AllSubtitles = new ArrayList<Subtitle>();
+    public static long trackLength = 0;
+
+    private final static ArrayList<Subtitle> AllSubtitles = new ArrayList<Subtitle>();
 
     public static boolean parseFile(InputStream inputStream) {
         AllSubtitles.clear(); // reset previous data
@@ -47,6 +49,7 @@ public class SubtitlesReader {
                 currentSubtitle.parseSubtitleBlockStr(subtitleBlockStr.toString());
                 AllSubtitles.add(currentSubtitle);
             }
+            getTrackLength();
             isHoldingValidSubtitles = true;
             return true;
 
@@ -79,19 +82,23 @@ public class SubtitlesReader {
 
         }
         private long parseTime(String timeStr) throws ParseException {
-            // SRT timestamps are "HH:mm:ss,SSS"
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss,SSS");
 
             Date date = sdf.parse(timeStr); // parse the string
             if (date == null) return 0;
 
-            // get milliseconds since start of day
-            long totalMillis = date.getTime()
+            // return milliseconds since start of day
+            return date.getTime()
                     - sdf.parse("00:00:00,000").getTime();
-
-            return totalMillis;
         }
     }
+    private static void getTrackLength() {
+
+        Subtitle lastSub = AllSubtitles.get(AllSubtitles.size() - 1);
+
+        trackLength = lastSub.endTimeMs;
+    }
+
     public static Subtitle getSubtitleAtIndex(int idx) {
         ArrayList<Subtitle> subs = AllSubtitles;
         if (idx < 0 || idx >= subs.size()) {
@@ -110,7 +117,7 @@ public class SubtitlesReader {
             Subtitle sub = AllSubtitles.get(mid);
 
             if (timeMs < sub.startTimeMs) {
-                result = mid; // next subtitle after the time
+                result = mid;
                 right = mid - 1;
             } else if (timeMs > sub.endTimeMs) {
                 left = mid + 1;

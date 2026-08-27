@@ -1,9 +1,13 @@
 package com.thing.subtitleviewer;
 
 public class SubtitlePlaybackState {
+    public static boolean playbackPaused = false;
     private static long timeOffset = 0;
     public static long getTimeOffset() {
         return timeOffset;
+    }
+    public static void setTimeOffset(long progress) {
+        timeOffset = progress;
     }
     public static void adjustOffsetForwardBack(long change) { // used for fast-forward/ backwards
         timeOffset += change;
@@ -15,7 +19,10 @@ public class SubtitlePlaybackState {
     public static int getIndex() {
         return currentIndex;
     }
-    public static void incrIndex() {
+    public static void setCurrentIndex(int idx) {
+        currentIndex = idx;
+    }
+    public static void incrCurrentIndex() {
         currentIndex++;
     }
     private static long startTimeMs;

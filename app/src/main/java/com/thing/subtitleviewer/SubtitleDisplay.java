@@ -1,17 +1,19 @@
 package com.thing.subtitleviewer;
 
-//import static com.thing.subtitleviewer.SubtitlePlaybackState.getStartTimeMs;
-//import static com.thing.subtitleviewer.SubtitlesReader.getSubtitleAtIndex;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
@@ -46,15 +48,11 @@ public class SubtitleDisplay extends AppCompatActivity {
         // Prevent the screen from turning off
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // thing to detect taps
-        View overlay = findViewById(R.id.overlayView);
-        setupTapAdjustments(overlay);
-
         subtitleText = findViewById(R.id.SubtitleText);
 
         startSubtitleLoop();
 
-        // Handle back presses (buttons, gestures, etc.)
+        // Handle back button/ action
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -62,6 +60,111 @@ public class SubtitleDisplay extends AppCompatActivity {
                 finish();
             }
         });
+
+        // Handle Swipe up Gesture
+        gestureDetector = new GestureDetector(this,
+                new GestureDetector.SimpleOnGestureListener() {
+
+                    @Override
+                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+                        float diffY = e1.getY() - e2.getY();
+
+                        // swipe up threshold
+                        if (diffY > 70 && Math.abs(velocityY) > 20) {
+                            showControls();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+        FrameLayout root = findViewById(R.id.rootFrame);
+
+        root.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                v.performClick();
+            }
+            return true;
+        });
+
+        // Handle SeekBar
+        seekBar = findViewById(R.id.seekBar);
+        seekBar.setMax((int) SubtitlesReader.trackLength);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (!fromUser) return;
+
+                SubtitlePlaybackState.setTimeOffset((long) progress);
+
+                SubtitlePlaybackState.setCurrentIndex(
+                        SubtitlesReader.getIndexCorrespondingToTime(progress)
+                );
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        // handle forward / back button
+
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            adjustTime(-500);
+            resetHideTimer();
+        });
+        ImageButton btnForward = findViewById(R.id.btnForward);
+        btnForward.setOnClickListener(v -> {
+            adjustTime(500);
+            resetHideTimer();
+        });
+        ImageButton btnBackBig = findViewById(R.id.btnBackBig);
+        btnBackBig.setOnClickListener(v -> {
+            adjustTime(-5000);
+            resetHideTimer();
+        });
+        ImageButton btnForwardBig = findViewById(R.id.btnForwardBig);
+        btnForwardBig.setOnClickListener(v -> {
+            adjustTime(5000);
+            resetHideTimer();
+        });
+
+        // handle pause / resume button
+        ImageButton btnPause = findViewById(R.id.btnPause);
+        btnPause.setOnClickListener(v -> {
+
+            if (SubtitlePlaybackState.playbackPaused) {
+                SubtitlePlaybackState.playbackPaused = false;
+                btnPause.setImageResource(R.drawable.ic_btn_pause);
+
+                SubtitlePlaybackState.setResumeMode();
+
+            } else { //not paused, pause now
+                SubtitlePlaybackState.playbackPaused = true;
+                btnPause.setImageResource(R.drawable.ic_btn_play);
+
+                SubtitlePlaybackState.saveTimeProgressAsTimeOffset();
+            }
+
+            resetHideTimer();
+        });
+    }
+    private void adjustTime(long delta) {
+        long newOffset = SubtitlePlaybackState.getTimeOffset() + delta;
+
+        SubtitlePlaybackState.setTimeOffset(newOffset);
+
+        SubtitlePlaybackState.setCurrentIndex(
+                SubtitlesReader.getIndexCorrespondingToTime(newOffset)
+        );
     }
 
     private TextView subtitleText;
@@ -72,8 +175,17 @@ public class SubtitleDisplay extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                long elapsed = System.currentTimeMillis() - SubtitlePlaybackState.getStartTimeMs() + SubtitlePlaybackState.getTimeOffset();
+                long elapsed;
+
+                if (SubtitlePlaybackState.playbackPaused) {
+                    elapsed = SubtitlePlaybackState.getTimeOffset();
+                } else {
+                    elapsed = System.currentTimeMillis()
+                            - SubtitlePlaybackState.getStartTimeMs()
+                            + SubtitlePlaybackState.getTimeOffset();
+                }
                 updateSubtitle(elapsed);
+                seekBar.setProgress((int) elapsed);
 
                 // repeat the loop every 50ms
                 handler.postDelayed(this, 50);
@@ -97,7 +209,7 @@ public class SubtitleDisplay extends AppCompatActivity {
             } else {
                 // subtitle has ended
                 subtitleText.setText("");
-                SubtitlePlaybackState.incrIndex();  // move to the next subtitle
+                SubtitlePlaybackState.incrCurrentIndex();  // move to the next subtitle
 
                 updateSubtitle(currentTimeMs); // check next subtitle immediately
             }
@@ -106,56 +218,31 @@ public class SubtitleDisplay extends AppCompatActivity {
             subtitleText.setText("");
         }
     }
-    // Detect and handle double tap to change position within subtitles
-    private long lastTapTime = 0;
-    private int tapCount = 0;
-    private static final long TAP_INTERVAL_MS = 300; // max interval between taps
+    // Subtitle Navigation code
 
-    private void setupTapAdjustments(View overlayView) {
-        overlayView.setOnTouchListener((v, event) -> {
-            if (event.getAction() != MotionEvent.ACTION_DOWN) return false;
+    private SeekBar seekBar;
+    private GestureDetector gestureDetector;
+    private final Runnable hideRunnable = this::hideControls;
 
-            long now = System.currentTimeMillis();
+    private void showControls() {
+        LinearLayout panel = findViewById(R.id.controlPanel);
+        panel.setVisibility(View.VISIBLE);
 
-            if (now - lastTapTime > TAP_INTERVAL_MS) {
-                // Too long since last tap → reset count
-                tapCount = 1;
-            } else {
-                tapCount++;
-            }
-
-            lastTapTime = now;
-
-            // Schedule evaluation after interval
-            v.removeCallbacks(tapRunnable); // cancel any previous pending run
-            v.postDelayed(tapRunnable = () -> {
-                float x = lastTouchX;
-                if (tapCount == 2) {
-                    if (x < v.getWidth() / 2f) {
-                        SubtitlePlaybackState.adjustOffsetForwardBack(-300); // 0.3s back
-                        Toast.makeText(SubtitleDisplay.this, "-0.3", Toast.LENGTH_SHORT).show();
-                    } else {
-                        SubtitlePlaybackState.adjustOffsetForwardBack(300); // 0.3s forward
-                        Toast.makeText(SubtitleDisplay.this, "+0.3", Toast.LENGTH_SHORT).show();
-                    }
-                } else if (tapCount >= 3) {
-                    if (x < v.getWidth() / 2f) {
-                        SubtitlePlaybackState.adjustOffsetForwardBack(-5000); // 5s back
-                        Toast.makeText(SubtitleDisplay.this, "-5", Toast.LENGTH_SHORT).show();
-                    } else {
-                        SubtitlePlaybackState.adjustOffsetForwardBack(5000); // 5s forward
-                        Toast.makeText(SubtitleDisplay.this, "+5", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                tapCount = 0; // reset
-            }, TAP_INTERVAL_MS);
-
-            lastTouchX = event.getX(); // save last touch position
-            return true;
-        });
+        resetHideTimer();
     }
+    private void resetHideTimer() {
+        LinearLayout panel = findViewById(R.id.controlPanel);
 
-    // fields to track last touch
-    private float lastTouchX = 0;
-    private Runnable tapRunnable;
+        panel.removeCallbacks(hideRunnable);
+        panel.postDelayed(hideRunnable, 6000);
+    }
+    private void hideControls() {
+        LinearLayout panel = findViewById(R.id.controlPanel);
+        panel.setVisibility(View.GONE);
+    }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        resetHideTimer();
+        return super.dispatchTouchEvent(ev);
+    }
 }

@@ -1,7 +1,5 @@
 package com.thing.subtitleviewer;
 
-//        Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show();
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -111,10 +109,26 @@ public class MainActivity extends AppCompatActivity {
     }
     private ActivityResultLauncher<Intent> filePickerLauncher;
 
+//    public void SelectSubtitleFileClicked(View view) {
+//        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//        intent.setType("*/*");
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
+//
+//        filePickerLauncher.launch(intent);
+//    }
     public void SelectSubtitleFileClicked(View view) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("*/*"); // or "text/*" for .srt files
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        // show text only
+        intent.setType("text/*");
+
+        // Extra filters
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                "text/plain",
+                "application/x-subrip",
+                "text/*"
+        });
 
         filePickerLauncher.launch(intent);
     }
@@ -130,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
     public void StartSubtitleFromResume(View view) {
         if (!SubtitlesReader.getIsHoldingValidSubtitles()) {
             Toast.makeText(this, "Select Subtitle File First", Toast.LENGTH_SHORT).show();
+            SubtitlePlaybackState.playbackPaused = false;
             return;
         }
         SubtitlePlaybackState.setResumeMode();
