@@ -12,9 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SubtitleViewer">
         <activity
-            android:name=".SubtitleDisplay"
-            android:screenOrientation="landscape"
+            android:name=".HelpActivitiy"
             android:exported="false" />
+        <activity
+            android:name=".SubtitleDisplay"
+            android:exported="false"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

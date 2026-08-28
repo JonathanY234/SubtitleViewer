@@ -170,4 +170,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    public void OpenHelpScreen(View view) {
+        Intent intent = new Intent(this, HelpActivitiy.class);
+        startActivity(intent);
+    }
 }

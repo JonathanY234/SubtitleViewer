@@ -17,14 +17,14 @@
         android:text="Select Subtitle File"
 
         app:backgroundTint="#000000"
-        app:strokeColor="#FFFFFF"
-        app:strokeWidth="1dp"
         app:cornerRadius="16dp"
-
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Title" />
+        app:layout_constraintTop_toBottomOf="@+id/Title"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="1dp" />
 
     <TextView
         android:id="@+id/selectedFileText"
@@ -50,14 +50,14 @@
         android:text="Start From First Line"
 
         app:backgroundTint="#000000"
-        app:strokeColor="#FFFFFF"
-        app:strokeWidth="1dp"
         app:cornerRadius="16dp"
-
         app:layout_constraintEnd_toStartOf="@+id/StartSubtitleFromResume"
         app:layout_constraintHorizontal_chainStyle="spread"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/selectedFileText" />
+        app:layout_constraintTop_toBottomOf="@+id/selectedFileText"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="1dp" />
 
     <Button
         android:id="@+id/StartSubtitleFromResume"
@@ -68,13 +68,13 @@
         android:text="Start From Beginning"
 
         app:backgroundTint="#000000"
-        app:strokeColor="#FFFFFF"
-        app:strokeWidth="1dp"
         app:cornerRadius="16dp"
-
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/StartSubtitleFirstLine"
-        app:layout_constraintTop_toBottomOf="@+id/selectedFileText" />
+
+        app:layout_constraintTop_toBottomOf="@+id/selectedFileText"
+        app:strokeColor="#FFFFFF"
+        app:strokeWidth="1dp" />
 
     <TextView
         android:id="@+id/Title"
@@ -94,5 +94,15 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#000000"
+        android:onClick="OpenHelpScreen"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/help" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
