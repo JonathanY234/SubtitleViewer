@@ -108,4 +108,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/help" />
 
+    <ImageButton
+        android:id="@+id/btnOpenSubtitles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#000000"
+        android:onClick="LaunchOpenSubtitles"
+        android:contentDescription="OpenSubtitles website"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/download_button" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

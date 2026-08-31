@@ -169,6 +169,13 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, HelpActivity.class);
         startActivity(intent);
     }
+    public void LaunchOpenSubtitles(View view) {
+        Intent intent = new Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.opensubtitles.com/")
+        );
+        startActivity(intent);
+    }
 
     private InputStream getSrtIfInAZip(InputStream input) throws IOException {
         BufferedInputStream bufferedStream = new BufferedInputStream(input);
