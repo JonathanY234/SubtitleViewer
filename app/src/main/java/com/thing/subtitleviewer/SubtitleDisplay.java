@@ -13,6 +13,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
@@ -243,5 +245,14 @@ public class SubtitleDisplay extends AppCompatActivity {
     public boolean dispatchTouchEvent(MotionEvent ev) {
         resetHideTimer();
         return super.dispatchTouchEvent(ev);
+    }
+
+    // Handle Rotate Screen Button
+    public void RotateScreenClicked(View view) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
     }
 }

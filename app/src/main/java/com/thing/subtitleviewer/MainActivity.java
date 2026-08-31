@@ -18,7 +18,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,14 +47,16 @@ public class MainActivity extends AppCompatActivity {
                         Uri uri = result.getData().getData();
                         String fileName = getFileName(uri);
 
-                        if (!isSrtFile(fileName)) {
-                            Toast.makeText(this, "Invalid File. Must be .srt", Toast.LENGTH_SHORT).show();
+                        if (!isSrtOrZipFile(fileName)) {
+                            Toast.makeText(this, "Invalid File. Must be .srt or .zip", Toast.LENGTH_SHORT).show();
                             resetFileText(fileText);
                             return;
                         }
 
-                        try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
-                            boolean success = SubtitlesParser.parseFile(inputStream);
+                        try (InputStream inputStream = getContentResolver().openInputStream(uri);
+                             InputStream subtitleStream = getSrtIfInAZip(inputStream)) {
+
+                            boolean success = SubtitlesParser.parseFile(subtitleStream);
 
                             if (success) {
                                 lastSelectedFileUri = uri; // store URI for restore in future
@@ -99,37 +106,21 @@ public class MainActivity extends AppCompatActivity {
         }
         return result;
     }
-    private boolean isSrtFile(String fileName) {
+    private boolean isSrtOrZipFile(String fileName) {
         if (fileName.length() >= 3) {
             String extension = fileName.substring(fileName.length() - 3);
-            return extension.equalsIgnoreCase("srt");
+            return extension.equalsIgnoreCase("srt") || extension.equalsIgnoreCase("zip");
         } else {
             return false;
         }
     }
     private ActivityResultLauncher<Intent> filePickerLauncher;
 
-//    public void SelectSubtitleFileClicked(View view) {
-//        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-//        intent.setType("*/*");
-//        intent.addCategory(Intent.CATEGORY_OPENABLE);
-//
-//        filePickerLauncher.launch(intent);
-//    }
     public void SelectSubtitleFileClicked(View view) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-        // show text only
-        intent.setType("text/*");
-
-        // Extra filters
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-                "text/plain",
-                "application/x-subrip",
-                "text/*"
-        });
-
+        intent.setType("*/*");
         filePickerLauncher.launch(intent);
     }
     public void StartSubtitleFirstLineClicked(View view) {
@@ -164,14 +155,43 @@ public class MainActivity extends AppCompatActivity {
             long seconds = totalSeconds % 60;
 
             if (hours > 0) {
-                startButton.setText(String.format("Resume from %d:%02d:%02d", hours, minutes, seconds));
+                startButton.setText(String.format(Locale.ENGLISH, "Resume from %d:%02d:%02d", hours, minutes, seconds));
             } else {
-                startButton.setText(String.format("Resume from %d:%02d", minutes, seconds));
+                startButton.setText(String.format(Locale.ENGLISH, "Resume from %d:%02d", minutes, seconds));
             }
         }
     }
     public void OpenHelpScreen(View view) {
         Intent intent = new Intent(this, HelpActivitiy.class);
         startActivity(intent);
+    }
+
+    private InputStream getSrtIfInAZip(InputStream input) throws IOException {
+        BufferedInputStream bufferedStream = new BufferedInputStream(input);
+
+        // check if it's a zip file
+        bufferedStream.mark(4); // allow for rewinding
+        int first = bufferedStream.read();
+        int second = bufferedStream.read();
+        int third = bufferedStream.read();
+        int fourth = bufferedStream.read();
+        bufferedStream.reset();
+        if (first != 'P' || second != 'K' || third != 0x03 || fourth != 0x04) {
+            return bufferedStream; // not a zip therefore treat as a srt
+        }
+
+        // open as zip and look for srt within
+        ZipInputStream zipStream = new ZipInputStream(bufferedStream);
+        ZipEntry entry;
+        while ((entry = zipStream.getNextEntry()) != null) {
+            if (!entry.isDirectory()
+                    && entry.getName().toLowerCase().endsWith(".srt")) {
+                // just use the first .srt we find
+                return zipStream;
+            }
+        }
+
+        Toast.makeText(this, "Zip file does not contain a SRT Subtitle file", Toast.LENGTH_SHORT).show();
+        throw new IOException("Zip file does not contain a SRT Subtitle file"); // don't do this
     }
 }

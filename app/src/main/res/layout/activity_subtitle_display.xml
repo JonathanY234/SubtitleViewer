@@ -54,7 +54,6 @@
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <!-- playback controls -->
                 <ImageButton
                     android:id="@+id/btnBackBig"
                     android:layout_width="48dp"
@@ -96,7 +95,21 @@
                     android:contentDescription="forward big"/>
 
                 </LinearLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp">
 
+                    <ImageButton
+                        android:id="@+id/btnRotate"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="bottom|start"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Rotate screen"
+                        android:onClick="RotateScreenClicked"
+                        android:src="@drawable/rotate_screen" />
+
+                    </FrameLayout>
             </LinearLayout>
 
     </FrameLayout>
