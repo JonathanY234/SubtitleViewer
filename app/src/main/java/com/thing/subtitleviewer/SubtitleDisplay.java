@@ -1,10 +1,10 @@
 package com.thing.subtitleviewer;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -25,6 +25,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class SubtitleDisplay extends AppCompatActivity {
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,33 +62,13 @@ public class SubtitleDisplay extends AppCompatActivity {
                 finish();
             }
         });
-
-        // Handle Swipe up Gesture
-        gestureDetector = new GestureDetector(this,
-                new GestureDetector.SimpleOnGestureListener() {
-
-                    @Override
-                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-                        float diffY = e1.getY() - e2.getY();
-
-                        // swipe up threshold
-                        if (diffY > 70 && Math.abs(velocityY) > 20) {
-                            showControls();
-                            return true;
-                        }
-                        return false;
-                    }
-                });
         FrameLayout root = findViewById(R.id.rootFrame);
-
         root.setOnTouchListener((v, event) -> {
-            gestureDetector.onTouchEvent(event);
-
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                v.performClick();
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                showControls();
             }
-            return true;
+
+            return false;
         });
 
         // Handle SeekBar
@@ -100,7 +81,7 @@ public class SubtitleDisplay extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (!fromUser) return;
 
-                SubtitlePlaybackState.setTimeOffset((long) progress);
+                SubtitlePlaybackState.setTimeOffset(progress);
 
                 SubtitlePlaybackState.setCurrentIndex(
                         SubtitlesParser.getIndexCorrespondingToTime(progress)
@@ -210,7 +191,7 @@ public class SubtitleDisplay extends AppCompatActivity {
             } else {
                 // subtitle has ended
                 subtitleText.setText("");
-                SubtitlePlaybackState.incrCurrentIndex();  // move to the next subtitle
+                SubtitlePlaybackState.incrementCurrentIndex();  // move to the next subtitle
 
                 updateSubtitle(currentTimeMs); // check next subtitle immediately
             }
@@ -222,7 +203,6 @@ public class SubtitleDisplay extends AppCompatActivity {
     // Subtitle Navigation code
 
     private SeekBar seekBar;
-    private GestureDetector gestureDetector;
     private final Runnable hideRunnable = this::hideControls;
 
     private void showControls() {
@@ -248,6 +228,7 @@ public class SubtitleDisplay extends AppCompatActivity {
     }
 
     // Handle Rotate Screen Button
+    @SuppressLint("SourceLockedOrientationActivity")
     public void RotateScreenClicked(View view) {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

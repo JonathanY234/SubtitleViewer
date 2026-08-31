@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class SubtitlesParser {
 
     private static boolean isHoldingValidSubtitles = false;
-    public static boolean getIsHoldingValidSubtitles() {
-        return isHoldingValidSubtitles;
+    public static boolean getHoldingInvalidSubtitles() {
+        return !isHoldingValidSubtitles;
     }
     public static void invalidateCurrentSubtitles() {
         isHoldingValidSubtitles = false;
@@ -17,7 +17,7 @@ public class SubtitlesParser {
 
     public static long trackLength = 0;
 
-    private final static ArrayList<Subtitle> allSubtitles = new ArrayList<Subtitle>();
+    private final static ArrayList<Subtitle> allSubtitles = new ArrayList<>();
 
     public static boolean parseFile(InputStream inputStream) {
         allSubtitles.clear(); // reset previous data
@@ -64,7 +64,7 @@ public class SubtitlesParser {
         long startTimeMs;
         long endTimeMs;
         String text;
-        private void parseSubtitleBlockStr(String subData) throws Exception {
+        private void parseSubtitleBlockStr(String subData) {
             String[] subBlockArray = subData.split("\n");
 
             String timeData = subBlockArray[1];

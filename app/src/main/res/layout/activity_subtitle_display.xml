@@ -23,15 +23,15 @@
             android:id="@+id/SubtitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="hello there this a a very nice subtitle hahahaahahaha"
+            android:text="hello there this a a very nice subtitle hahahahahaha"
             android:textColor="#FFFFFF"
             android:textSize="38sp"
             android:gravity="center"
             android:layout_gravity="center"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="16sp"
-            android:autoSizeMaxTextSize="38sp"
-            android:autoSizeStepGranularity="2sp"/>
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="16sp"
+            app:autoSizeMaxTextSize="38sp"
+            app:autoSizeStepGranularity="2sp"/>
 
         <!-- Control panel (hidden initially) -->
         <LinearLayout

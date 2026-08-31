@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SubtitleViewer">
         <activity
-            android:name=".HelpActivitiy"
+            android:name=".HelpActivity"
             android:exported="false" />
         <activity
             android:name=".SubtitleDisplay"

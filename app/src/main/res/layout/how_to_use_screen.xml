@@ -3,7 +3,7 @@
     android:id="@+id/main"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="24dp"
-                android:text="This app plays back subtitles. Made for people with hearing loss, or anyone who simply prefers to watch content with subtitles. Even when the content doesn't offer integrated subtitles"
+                android:text="This app plays back subtitles. Made for people with hearing loss, or anyone who simply prefers to watch content with subtitles even when the content doesn't offer integrated subtitles."
                 android:textColor="#CCCCCC"
                 android:textSize="16sp" />
 
@@ -49,7 +49,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Download subtitles to your device. opensubtitles.com provides a large selection of subtitles for free.\nSubtitles must be in the .srt format or ZIP archive containing .srt file."
+                android:text="Download subtitles to your device. opensubtitles.com provides a large selection of subtitles for free.\nSubtitles must be in the .srt format or a ZIP archive containing a .srt file."
                 android:textColor="#CCCCCC"
                 android:textSize="16sp" />
             <TextView
@@ -130,14 +130,14 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="
-when the first spoken line of the video appears."
+                android:text="when the first spoken line of the video appears."
                 android:textColor="#CCCCCC"
                 android:textSize="16sp" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="4. Adjust timing offset"
+                android:paddingTop="10dp"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -145,8 +145,8 @@ when the first spoken line of the video appears."
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="24dp"
-                android:text="In Subtitle display screen tap to bring up media controls."
+                android:paddingBottom="10dp"
+                android:text="On the Subtitle Display screen, tap anywhere to bring up the media controls"
                 android:textColor="#CCCCCC"
                 android:textSize="16sp" />
             <LinearLayout
@@ -177,7 +177,7 @@ when the first spoken line of the video appears."
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Adjust timing +/- 5 Seconds"
+                    android:text="  Adjust timing ± 5 Seconds"
                     android:textColor="#FFFFFF"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -192,7 +192,7 @@ when the first spoken line of the video appears."
                     android:layout_height="48dp"
                     android:src="@drawable/ic_btn_backward_small"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="backward big"/>
+                    android:contentDescription="backward small"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -205,11 +205,11 @@ when the first spoken line of the video appears."
                     android:layout_height="48dp"
                     android:src="@drawable/ic_btn_forward_small"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="forward big"/>
+                    android:contentDescription="forward small"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Adjust timing +/- 0.5 Seconds"
+                    android:text="  Adjust timing ± 0.5 Seconds"
                     android:textColor="#FFFFFF"
                     android:textSize="16sp" />
                 </LinearLayout>
@@ -224,7 +224,7 @@ when the first spoken line of the video appears."
                         android:layout_height="48dp"
                         android:src="@drawable/rotate_screen"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="backward big"/>
+                        android:contentDescription="rotate screen"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -232,13 +232,6 @@ when the first spoken line of the video appears."
                         android:textColor="#FFFFFF"
                         android:textSize="16sp" />
                     </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Hello There"
-                    android:textColor="#CCCCCC"
-                    android:textSize="16sp" />
 
         </LinearLayout>
 

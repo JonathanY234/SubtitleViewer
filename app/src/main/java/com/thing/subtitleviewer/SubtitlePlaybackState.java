@@ -9,12 +9,6 @@ public class SubtitlePlaybackState {
     public static void setTimeOffset(long progress) {
         timeOffset = progress;
     }
-    public static void adjustOffsetForwardBack(long change) { // used for fast-forward/ backwards
-        timeOffset += change;
-        if (change < 0) {
-            currentIndex = SubtitlesParser.getIndexCorrespondingToTime(timeOffset);
-        }
-    }
     private static int currentIndex = 0;
     public static int getIndex() {
         return currentIndex;
@@ -22,7 +16,7 @@ public class SubtitlePlaybackState {
     public static void setCurrentIndex(int idx) {
         currentIndex = idx;
     }
-    public static void incrCurrentIndex() {
+    public static void incrementCurrentIndex() {
         currentIndex++;
     }
     private static long startTimeMs;
@@ -34,8 +28,7 @@ public class SubtitlePlaybackState {
 
         // get the start time of the first subtitle
         SubtitlesParser.Subtitle firstSub = SubtitlesParser.getSubtitleAtIndex(0);
-        long firstSubStartMs = (firstSub != null) ? firstSub.startTimeMs : 0;
-        timeOffset = firstSubStartMs;
+        timeOffset = (firstSub != null) ? firstSub.startTimeMs : 0;
 
         startTimeMs = System.currentTimeMillis();
     }

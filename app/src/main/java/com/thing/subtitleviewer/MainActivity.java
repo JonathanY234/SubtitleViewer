@@ -45,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri uri = result.getData().getData();
+                        if (uri == null) {
+                            Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         String fileName = getFileName(uri);
 
                         if (!isSrtOrZipFile(fileName)) {
@@ -87,8 +91,8 @@ public class MainActivity extends AppCompatActivity {
         updateResumeStartButtonText();
     }
 
-    private void resetFileText(TextView fileTextt) {
-        fileTextt.setText("");
+    private void resetFileText(TextView fileTxt) {
+        fileTxt.setText("");
         SubtitlesParser.invalidateCurrentSubtitles();
     }
     private String getFileName(Uri uri) {
@@ -124,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         filePickerLauncher.launch(intent);
     }
     public void StartSubtitleFirstLineClicked(View view) {
-        if (!SubtitlesParser.getIsHoldingValidSubtitles()) {
+        if (SubtitlesParser.getHoldingInvalidSubtitles()) {
             Toast.makeText(this, "Select Subtitle File First", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -133,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void StartSubtitleFromResume(View view) {
-        if (!SubtitlesParser.getIsHoldingValidSubtitles()) {
+        if (SubtitlesParser.getHoldingInvalidSubtitles()) {
             Toast.makeText(this, "Select Subtitle File First", Toast.LENGTH_SHORT).show();
             SubtitlePlaybackState.playbackPaused = false;
             return;
@@ -162,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void OpenHelpScreen(View view) {
-        Intent intent = new Intent(this, HelpActivitiy.class);
+        Intent intent = new Intent(this, HelpActivity.class);
         startActivity(intent);
     }
 
