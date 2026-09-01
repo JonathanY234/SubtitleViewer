@@ -23,6 +23,7 @@ public class SubtitlePlaybackState {
     public static long getStartTimeMs() {
         return startTimeMs;
     }
+    public static void resetForNewVideo() {currentIndex = 0; timeOffset = 0;}
     public static void setFirstSubtitleLineMode() {
         currentIndex = 0;
 

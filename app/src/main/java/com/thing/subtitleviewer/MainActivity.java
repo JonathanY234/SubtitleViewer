@@ -36,6 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
         TextView fileText = findViewById(R.id.selectedFileText);
 
+        // Check if the app was opened with a file
+        Uri incomingUri = getIntent().getData();
+        if (incomingUri != null) {
+            handleSubtitleFile(incomingUri, fileText);
+        }
+
         // restore fileName if we have one saved
         if (lastSelectedFileUri != null) {
             fileText.setText(getFileName(lastSelectedFileUri));
@@ -49,31 +55,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        String fileName = getFileName(uri);
-
-                        if (!isSrtOrZipFile(fileName)) {
-                            Toast.makeText(this, "Invalid File. Must be .srt or .zip", Toast.LENGTH_SHORT).show();
-                            resetFileText(fileText);
-                            return;
-                        }
-
-                        try (InputStream inputStream = getContentResolver().openInputStream(uri);
-                             InputStream subtitleStream = getSrtIfInAZip(inputStream)) {
-
-                            boolean success = SubtitlesParser.parseFile(subtitleStream);
-
-                            if (success) {
-                                lastSelectedFileUri = uri; // store URI for restore in future
-                                fileText.setText(fileName);
-                            } else {
-                                Toast.makeText(this, "Error: Could not parse .srt file", Toast.LENGTH_SHORT).show();
-                                resetFileText(fileText);
-                            }
-                        } catch (Exception e) {
-                            // This should really not happen unless openInputStream fails
-                            Toast.makeText(this, "Unexpected error reading file", Toast.LENGTH_SHORT).show();
-                            resetFileText(fileText);
-                        }
+                        handleSubtitleFile(uri, fileText);
                     }
                 }
         );
@@ -85,6 +67,54 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    private void handleSubtitleFile(Uri uri, TextView fileText) {
+
+        String fileName = getFileName(uri);
+
+        if (!isSrtOrZipFile(fileName)) {
+            Toast.makeText(
+                    this,
+                    "Invalid File. Must be .srt or .zip",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            resetFileText(fileText);
+            return;
+        }
+
+        try (InputStream inputStream =
+                     getContentResolver().openInputStream(uri);
+             InputStream subtitleStream =
+                     getSrtIfInAZip(inputStream)) {
+
+            boolean success = SubtitlesParser.parseFile(subtitleStream);
+
+            if (success) {
+                lastSelectedFileUri = uri;
+                fileText.setText(fileName);
+                SubtitlePlaybackState.resetForNewVideo();
+            } else {
+                Toast.makeText(
+                        this,
+                        "Error: Could not parse .srt file",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                resetFileText(fileText);
+            }
+
+        } catch (Exception e) {
+            Toast.makeText(
+                    this,
+                    "Unexpected error reading file",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            resetFileText(fileText);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
